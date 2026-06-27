@@ -549,10 +549,10 @@ async function fetchFirebase() {
 
 async function fetchCryptoPrices() {
   if (!state?.trades) return;
-  const open = state.trades.filter(t => t.status === 'OPEN' && t.asset_type === 'crypto');
-  if (!open.length) return;
+  const trades = state.trades.filter(t => (t.status === 'OPEN' || t.status === 'PENDING') && t.asset_type === 'crypto');
+  if (!trades.length) return;
   try {
-    const syms  = JSON.stringify(open.map(t => t.symbol));
+    const syms  = JSON.stringify(trades.map(t => t.symbol));
     const r     = await fetch(`${BINANCE}?symbols=${encodeURIComponent(syms)}`);
     const data  = await r.json();
     if (Array.isArray(data)) data.forEach(t => { cryptoPx[t.symbol] = parseFloat(t.price); });
@@ -562,13 +562,13 @@ async function fetchCryptoPrices() {
 
 async function fetchForexPrices() {
   if (!state?.trades) return;
-  const open = state.trades.filter(t => t.status === 'OPEN' && t.asset_type === 'forex');
-  if (!open.length) return;
+  const trades = state.trades.filter(t => (t.status === 'OPEN' || t.status === 'PENDING') && t.asset_type === 'forex');
+  if (!trades.length) return;
   try {
-    const pairs = open.map(t => t.symbol.replace('/', '')).join(',');
+    const pairs = trades.map(t => t.symbol.replace('/', '')).join(',');
     const r     = await fetch(`${FREEFOREX}?pairs=${pairs}`);
     const d     = await r.json();
-    if (d.rates) open.forEach(t => {
+    if (d.rates) trades.forEach(t => {
       const k = t.symbol.replace('/','');
       if (d.rates[k]) forexPx[t.symbol] = d.rates[k].rate;
     });
@@ -1062,7 +1062,7 @@ function updatePnlNumbers() {
     if (!p || !entry) return;
     const dist = Math.abs(p - entry);
     const pct  = (dist / p) * 100;
-    el.textContent = fmtPrice(sym, dist) + ' away';
+    el.textContent = pct.toFixed(2) + '% away';
     el.className   = 'pending-dist ' + (pct < 0.5 ? 'near' : pct < 2 ? 'mid' : 'far');
   });
 
