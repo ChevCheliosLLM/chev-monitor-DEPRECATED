@@ -1053,11 +1053,23 @@ function updatePnlNumbers() {
   });
 
   // Pending card distances
+  const nyNow  = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const nyDay  = nyNow.getDay();
+  const nyMins = nyNow.getHours() * 60 + nyNow.getMinutes();
+  const marketOpen = nyDay >= 1 && nyDay <= 5 && nyMins >= 570 && nyMins < 960;
+
   document.querySelectorAll('.pending-dist').forEach(el => {
     const sym   = el.dataset.sym;
     const entry = parseFloat(el.dataset.entry);
     const t     = (state?.trades || []).find(t => t.symbol === sym && t.status === 'PENDING');
     if (!t) return;
+
+    if (t.asset_type === 'stock' && !marketOpen) {
+      el.textContent = 'Market Closed';
+      el.className   = 'pending-dist mid';
+      return;
+    }
+
     const p = livePrice(t);
     if (!p || !entry) return;
     const dist = Math.abs(p - entry);
