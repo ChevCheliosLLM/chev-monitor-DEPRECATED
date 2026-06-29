@@ -212,6 +212,7 @@
   }
   .dir-long  { background: rgba(8,153,129,.2); color: var(--green); border: 1px solid rgba(8,153,129,.4); }
   .dir-short { background: rgba(242,54,69,.2);  color: var(--red);   border: 1px solid rgba(242,54,69,.4); }
+  .type-pill { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(212,175,55,.1); color: var(--gold); border: 1px solid rgba(212,175,55,.25); }
 
   .trade-pnl {
     font-family: var(--mono);
@@ -803,6 +804,7 @@ function tradeCardHTML(t) {
         <div class="trade-emoji">${em}</div>
         <div class="trade-symbol">${t.symbol}</div>
         <div class="dir-pill dir-${t.direction}">${t.direction}</div>
+        ${t.trade_type ? `<div class="type-pill">${t.trade_type}</div>` : ''}
       </div>
       <div class="trade-pnl ${pnlClass(pnl)}">${fmtPnl(pnl)}</div>
     </div>
@@ -940,7 +942,7 @@ function updateModal(trade) {
   const isOpen = trade.status === 'OPEN';
 
   document.getElementById('modalTitle').innerHTML =
-    `${trade.symbol} <span class="dir-pill dir-${trade.direction}">${trade.direction}</span>`;
+    `${trade.symbol} <span class="dir-pill dir-${trade.direction}">${trade.direction}</span>${trade.trade_type ? ` <span class="type-pill">${trade.trade_type}</span>` : ''}`;
 
   document.getElementById('modalPrice').textContent = fmtPrice(trade.symbol, price);
   const pnlEl = document.getElementById('modalPnl');
